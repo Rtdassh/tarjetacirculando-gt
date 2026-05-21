@@ -1,0 +1,79 @@
+CREATE TABLE MARCA (
+    id_marca SERIAL PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL UNIQUE
+);
+
+CREATE TABLE LINEA (
+    id_linea SERIAL PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL,
+    id_marca INTEGER NOT NULL,
+    CONSTRAINT fk_linea_marca FOREIGN KEY (id_marca) REFERENCES MARCA(id_marca) ON DELETE RESTRICT
+);
+
+CREATE TABLE COLOR (
+    id_color SERIAL PRIMARY KEY,
+    nombre VARCHAR(30) NOT NULL UNIQUE
+);
+
+CREATE TABLE TIPO_VEHICULO (
+    id_tipo SERIAL PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL UNIQUE
+);
+
+CREATE TABLE USO_VEHICULO (
+    id_uso SERIAL PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL UNIQUE
+);
+
+CREATE TABLE PROPIETARIO (
+    nit VARCHAR(15) PRIMARY KEY,
+    cui VARCHAR(13) NOT NULL UNIQUE,
+    nombres VARCHAR(100) NOT NULL,
+    apellidos VARCHAR(100) NOT NULL,
+    direccion VARCHAR(200) NOT NULL
+);
+
+CREATE TABLE VEHICULO (
+    placa VARCHAR(8) PRIMARY KEY,
+    chasis VARCHAR(50) NOT NULL UNIQUE,
+    motor VARCHAR(50) NOT NULL UNIQUE,
+    anio SMALLINT NOT NULL,
+    asientos SMALLINT NOT NULL,
+    id_linea INTEGER NOT NULL,
+    id_color INTEGER NOT NULL,
+    id_tipo INTEGER NOT NULL,
+    CONSTRAINT fk_vehiculo_linea FOREIGN KEY (id_linea) REFERENCES LINEA(id_linea) ON DELETE RESTRICT,
+    CONSTRAINT fk_vehiculo_color FOREIGN KEY (id_color) REFERENCES COLOR(id_color) ON DELETE RESTRICT,
+    CONSTRAINT fk_vehiculo_tipo FOREIGN KEY (id_tipo) REFERENCES TIPO_VEHICULO(id_tipo) ON DELETE RESTRICT
+);
+
+CREATE TABLE TARJETA_CIRCULACION (
+    no_tarjeta SERIAL PRIMARY KEY,
+    placa VARCHAR(8) NOT NULL,
+    nit_propietario VARCHAR(15) NOT NULL,
+    id_uso INTEGER NOT NULL,
+    fecha_emision DATE NOT NULL,
+    fecha_vencimiento DATE NOT NULL,
+    estado BOOLEAN NOT NULL DEFAULT TRUE,
+    CONSTRAINT fk_tarjeta_vehiculo FOREIGN KEY (placa) REFERENCES VEHICULO(placa) ON DELETE RESTRICT,
+    CONSTRAINT fk_tarjeta_propietario FOREIGN KEY (nit_propietario) REFERENCES PROPIETARIO(nit) ON DELETE RESTRICT,
+    CONSTRAINT fk_tarjeta_uso FOREIGN KEY (id_uso) REFERENCES USO_VEHICULO(id_uso) ON DELETE RESTRICT
+);
+
+CREATE TABLE HISTORIAL_CAMBIOS_TARJETA (
+    id_historial SERIAL PRIMARY KEY,
+    no_tarjeta INTEGER NOT NULL,
+    
+    tipo_cambio VARCHAR(50) NOT NULL,
+    descripcion TEXT NOT NULL,
+    
+    valor_anterior VARCHAR(255),
+    valor_nuevo VARCHAR(255),
+    
+    fecha_cambio TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    
+    CONSTRAINT fk_historial_tarjeta
+        FOREIGN KEY (no_tarjeta)
+        REFERENCES TARJETA_CIRCULACION(no_tarjeta)
+        ON DELETE CASCADE
+);
